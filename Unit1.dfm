@@ -1,9 +1,11 @@
 object Form1: TForm1
   Left = 542
   Top = 188
-  Width = 591
-  Height = 514
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
   Caption = 'AddresToNumber'
+  ClientHeight = 481
+  ClientWidth = 569
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,6 +13,7 @@ object Form1: TForm1
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesktopCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -167,7 +170,7 @@ object Form1: TForm1
       Font.Name = 'MS Sans Serif'
       Font.Style = []
       ParentFont = False
-      TabOrder = 0
+      TabOrder = 9
       OnClick = Button1Click
     end
     object ComboBox1: TComboBox
@@ -182,7 +185,7 @@ object Form1: TForm1
       Font.Style = [fsBold]
       ItemHeight = 20
       ParentFont = False
-      TabOrder = 1
+      TabOrder = 0
       OnChange = ComboBox1Change
       Items.Strings = (
         'M16'
@@ -204,7 +207,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 2
+      TabOrder = 1
       Text = '  '
     end
     object Edit3: TMaskEdit
@@ -220,7 +223,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 1
       ParentFont = False
-      TabOrder = 3
+      TabOrder = 2
       Text = ' '
     end
     object Edit4: TMaskEdit
@@ -236,7 +239,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 4
+      TabOrder = 3
       Text = '  '
     end
     object Edit5: TMaskEdit
@@ -252,7 +255,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 5
+      TabOrder = 4
       Text = '  '
     end
     object Edit6: TMaskEdit
@@ -268,7 +271,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 6
+      TabOrder = 5
       Text = '  '
     end
     object Edit7: TMaskEdit
@@ -284,7 +287,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 7
+      TabOrder = 6
       Text = '  '
     end
     object Edit8: TMaskEdit
@@ -300,7 +303,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 8
+      TabOrder = 7
       Text = '  '
     end
     object Edit9: TMaskEdit
@@ -316,7 +319,7 @@ object Form1: TForm1
       Font.Style = []
       MaxLength = 2
       ParentFont = False
-      TabOrder = 9
+      TabOrder = 8
       Text = '  '
     end
   end
@@ -324,7 +327,7 @@ object Form1: TForm1
     Left = 0
     Top = 248
     Width = 569
-    Height = 217
+    Height = 233
     ScrollBars = ssVertical
     TabOrder = 1
   end

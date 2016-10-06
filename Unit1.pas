@@ -484,11 +484,17 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 const
 OUTSTEP=10;
-MAXGROUPINKADR=32;
+MAXGROUPINCIKL=32;
+MAXCIKLINKADR=4;
 var
-i,j:integer;
+i,j,m:integer;
 str:string;
+//номер группы
 iGr:integer;
+//первый вычесленный номер группы
+iGrF:integer;
+//номер цикла
+iC:integer;
 begin
   j:=0;
   str:=CollectADR;
@@ -500,17 +506,78 @@ begin
     i:=numOutElemG-1; {3173-1 проверочные данные. номер начальной точки}
      {stepOutG:=3072; проверочные данные. размер смещения от нач. точки}
     form1.Memo1.Lines.Add('Номера точек в кадре ОРБИТА'+form1.ComboBox1.Items[form1.ComboBox1.itemindex]);
-    //проверяем в данной группе есть ли элемент.
+
+
+    //производим вывод для 1 кадра 4 цикла по 32 группы
+    //вычисляем номер первой группы
+    iGr:=trunc((i+1)/masgMax);
+    iGrF:=iGr;
+    //вычисляем номер первого цикла
+    iC:=trunc(iGr/MAXGROUPINCIKL);
+    //вычисляем номер точки в первой группе
+    i:=((i+1)-(iGr*masgMax))-1;
+    inc(iGr);
+    iGrF:=iGr;
+    inc(iC);
+    m:=i;
+
+    if iC<=MAXCIKLINKADR then
+    begin
+      while iC<=MAXCIKLINKADR do
+      begin
+        if iGr<=MAXGROUPINCIKL then
+        begin
+          //ограничиваем вывод циклом(32гр.). Нумерация группы с 1.
+          while iGr<=MAXGROUPINCIKL do
+          begin
+            i:=m;
+            //вывод в пределах текущей группы
+            while i<masgMax do
+            begin
+              inc(j);
+              form1.Memo1.Lines.Add('Цикл №'+intToStr(iC)+' || '+'Группа №'+intToStr(iGr)+
+              ' || '+'№слова при выводе:'+intToStr(j)+' || '+'№слова в группе:'+intToStr(i));
+              i:=i+stepOutG;
+            end;
+            //j:=0;
+            //переход на след. группу
+            if stepOutG>masgMax then
+            begin
+              iGr:=iGr+(trunc(stepOutG/masgMax));
+            end
+            else
+            begin
+              inc(iGr);
+            end;
+          end;
+          iC:=iC+trunc(iGr/MAXGROUPINCIKL);
+          iGr:=iGrF;
+        end
+        else
+        begin
+          form1.Memo1.Lines.Add('Неверный адрес!');
+          break;
+        end;
+      end;
+    end
+    else
+    begin
+      form1.Memo1.Lines.Add('Неверный адрес!');
+    end;
+
+
+
+
 
     //если нет то выходит что он через группу.
-    if i>masgMax-1 then
+    {if i>masgMax-1 then
     begin
       //вычисляем номер первой группы в которой будет лежать медленный параметр
       iGr:=trunc((i+1)/(masgMax));
       //вычисляем номер точки в первой группе медленного параметра
       i:=((i+1)-(iGr*masgMax))-1;
       //ограничиваем вывод кадром(32гр.). Нумерация группы с 1.
-      while iGr<=MAXGROUPINKADR do
+      while iGr<=MAXGROUPINCIKL do
       begin
         inc(j);
         form1.Memo1.Lines.Add('Группа №'+intToStr(iGr)+' '+intToStr(j)+' слово. '+intToStr(i));
@@ -527,7 +594,9 @@ begin
         form1.Memo1.Lines.Add(intToStr(j)+' слово. '+intToStr(i));
         i:=i+stepOutG;
       end;
-    end;
+    end; }
+
+
   end
   else
   begin

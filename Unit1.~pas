@@ -433,111 +433,172 @@ str:string;
 i:integer;
 j:integer;
 begin
-str:='';
-i:=1;
-j:=2;
-form1.Memo1.Clear;
-//M
-if form1.Edit2.Text<>'  ' then
+  str:='';
+  i:=1;
+  j:=2;
+  form1.Memo1.Clear;
+  //M
+  if form1.Edit2.Text<>'  ' then
   begin
     str:=str+form1.m.Caption+form1.Edit2.Text[i]+form1.Edit2.Text[j];
   end;
-//П
-if form1.Edit3.Text<>' ' then
+  //П
+  if form1.Edit3.Text<>' ' then
   begin
     str:=str+form1.p.Caption+form1.Edit3.Text[i];
   end;
-//A
-if form1.Edit4.Text<>'  ' then
+  //A
+  if form1.Edit4.Text<>'  ' then
   begin
     str:=str+form1.a.Caption+form1.Edit4.Text[i]+form1.Edit4.Text[j];
   end;
-//B
-if form1.Edit5.Text<>'  ' then
+  //B
+  if form1.Edit5.Text<>'  ' then
   begin
     str:=str+form1.b.Caption+form1.Edit5.Text[i]+form1.Edit5.Text[j];
   end;
-//C
-if form1.Edit6.Text<>'  ' then
+  //C
+  if form1.Edit6.Text<>'  ' then
   begin
     str:=str+form1.c.Caption+form1.Edit6.Text[i]+form1.Edit6.Text[j];
   end;
-//D
-if form1.Edit7.Text<>'  ' then
+  //D
+  if form1.Edit7.Text<>'  ' then
   begin
     str:=str+form1.d.Caption+form1.Edit7.Text[i]+form1.Edit7.Text[j];
   end;
-//E
-if form1.Edit8.Text<>'  ' then
+  //E
+  if form1.Edit8.Text<>'  ' then
   begin
     str:=str+form1.e.Caption+form1.Edit8.Text[i]+form1.Edit8.Text[j];
   end;
-//X
-if form1.Edit9.Text<>'  ' then
+  //X
+  if form1.Edit9.Text<>'  ' then
   begin
     str:=str+form1.x.Caption+form1.Edit9.Text[i]+form1.Edit9.Text[j];
   end;
-result:=str;
+  result:=str;
 end;
 //==============================================================================
 
 procedure TForm1.Button1Click(Sender: TObject);
 const
 OUTSTEP=10;
-MAXGROUPINKADR=32;
+MAXGROUPINCIKL=32;
+MAXCIKLINKADR=4;
 var
-i,j:integer;
+i,j,m:integer;
 str:string;
+//номер группы
 iGr:integer;
+//первый вычесленный номер группы
+iGrF:integer;
+//номер цикла
+iC:integer;
 begin
-j:=0;
-
-str:=CollectADR;
-AdressAnalyser(str);
-form1.Memo1.Lines.Add(str);
-if numOutElemG<>-1 then
+  j:=0;
+  str:=CollectADR;
+  AdressAnalyser(str);
+  form1.Memo1.Lines.Add(str);
+  if numOutElemG<>-1 then
   begin
     //для нумерации с 0 переданный номер точки с 1 уменьшаем на 1
     i:=numOutElemG-1; {3173-1 проверочные данные. номер начальной точки}
      {stepOutG:=3072; проверочные данные. размер смещения от нач. точки}
-    form1.Memo1.Lines.Add('Номера точек в кадре ОРБИТА'+
-      form1.ComboBox1.Items[form1.ComboBox1.itemindex]);
-    //проверяем в данной группе есть ли элемент.
+    form1.Memo1.Lines.Add('Номера точек в кадре ОРБИТА'+form1.ComboBox1.Items[form1.ComboBox1.itemindex]);
+
+
+    //производим вывод для 1 кадра 4 цикла по 32 группы
+    //вычисляем номер первой группы
+    iGr:=trunc((i+1)/masgMax);
+    iGrF:=iGr;
+    //вычисляем номер первого цикла
+    iC:=trunc(iGr/MAXGROUPINCIKL);
+    //вычисляем номер точки в первой группе
+    i:=((i+1)-(iGr*masgMax))-1;
+    inc(iGr);
+    iGrF:=iGr;
+    inc(iC);
+    m:=i;
+
+    if iC<=MAXCIKLINKADR then
+    begin
+      while iC<=MAXCIKLINKADR do
+      begin
+        if iGr<=MAXGROUPINCIKL then
+        begin
+          //ограничиваем вывод циклом(32гр.). Нумерация группы с 1.
+          while iGr<=MAXGROUPINCIKL do
+          begin
+            i:=m;
+            //вывод в пределах текущей группы
+            while i<masgMax do
+            begin
+              inc(j);
+              form1.Memo1.Lines.Add('Цикл №'+intToStr(iC)+' || '+'Группа №'+intToStr(iGr)+
+              ' || '+'№слова при выводе:'+intToStr(j)+' || '+'№слова в группе:'+intToStr(i));
+              i:=i+stepOutG;
+            end;
+            //j:=0;
+            //переход на след. группу
+            if stepOutG>masgMax then
+            begin
+              iGr:=iGr+(trunc(stepOutG/masgMax));
+            end
+            else
+            begin
+              inc(iGr);
+            end;
+          end;
+          iC:=iC+trunc(iGr/MAXGROUPINCIKL);
+          iGr:=iGrF;
+        end
+        else
+        begin
+          form1.Memo1.Lines.Add('Неверный адрес!');
+          break;
+        end;
+      end;
+    end
+    else
+    begin
+      form1.Memo1.Lines.Add('Неверный адрес!');
+    end;
+
+
+
+
 
     //если нет то выходит что он через группу.
-    if i>masgMax-1 then
+    {if i>masgMax-1 then
+    begin
+      //вычисляем номер первой группы в которой будет лежать медленный параметр
+      iGr:=trunc((i+1)/(masgMax));
+      //вычисляем номер точки в первой группе медленного параметра
+      i:=((i+1)-(iGr*masgMax))-1;
+      //ограничиваем вывод кадром(32гр.). Нумерация группы с 1.
+      while iGr<=MAXGROUPINCIKL do
       begin
-        //вычисляем номер первой группы в которой будет лежать медленный параметр
-        iGr:=trunc((i+1)/(masgMax));
-        //вычисляем номер точки в первой группе медленного параметра
-        i:=((i+1)-(iGr*masgMax))-1;
-        //ограничиваем вывод кадром(32гр.). Нумерация группы с 1.
-        while iGr<=MAXGROUPINKADR do
-          begin
-            inc(j);
-            form1.Memo1.Lines.Add('Группа №'+intToStr(iGr)+
-              ' '+intToStr(j)+' слово. '+intToStr(i));
-            iGr:=iGr+(trunc(stepOutG/masgMax));
-          end;
-
-        //form1.Memo1.Lines.Add('В текущей группе значения нет'+
-          //'возможно он есть в следующих группах');
-
-      end
-    else
-      begin
-        //ограничиваем вывод группой
-        while i<masgMax do
-          begin
-            inc(j);
-            form1.Memo1.Lines.Add(intToStr(j)+' слово. '+intToStr(i));
-            i:=i+stepOutG;
-          end;
+        inc(j);
+        form1.Memo1.Lines.Add('Группа №'+intToStr(iGr)+' '+intToStr(j)+' слово. '+intToStr(i));
+        iGr:=iGr+(trunc(stepOutG/masgMax));
       end;
+      //form1.Memo1.Lines.Add('В текущей группе значения нет'+'возможно он есть в следующих группах');
+    end
+    else
+    begin
+      //ограничиваем вывод группой
+      while i<masgMax do
+      begin
+        inc(j);
+        form1.Memo1.Lines.Add(intToStr(j)+' слово. '+intToStr(i));
+        i:=i+stepOutG;
+      end;
+    end; }
 
 
   end
-else
+  else
   begin
     form1.Memo1.Lines.Add('Введен ошибочный адрес!');
   end;
@@ -545,78 +606,77 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-form1.Edit2.Enabled:=false;
-form1.Edit3.Enabled:=false;
-form1.Edit4.Enabled:=false;
-form1.Edit5.Enabled:=false;
-form1.Edit6.Enabled:=false;
-form1.Edit7.Enabled:=false;
-form1.Edit8.Enabled:=false;
-form1.Edit9.Enabled:=false;
-form1.Button1.Enabled:=false;
-form1.Memo1.Enabled:=false;
+  form1.Edit2.Enabled:=false;
+  form1.Edit3.Enabled:=false;
+  form1.Edit4.Enabled:=false;
+  form1.Edit5.Enabled:=false;
+  form1.Edit6.Enabled:=false;
+  form1.Edit7.Enabled:=false;
+  form1.Edit8.Enabled:=false;
+  form1.Edit9.Enabled:=false;
+  form1.Button1.Enabled:=false;
+  form1.Memo1.Enabled:=false;
 end;
 
 procedure TForm1.ComboBox1Change(Sender: TObject);
 begin
-//form1.Edit2.Enabled:=true;
-form1.Edit3.Enabled:=true;
-form1.Edit4.Enabled:=true;
-form1.Edit5.Enabled:=true;
-form1.Edit6.Enabled:=true;
-form1.Edit7.Enabled:=true;
-form1.Edit8.Enabled:=true;
-form1.Edit9.Enabled:=true;
-form1.Button1.Enabled:=true;
-form1.Memo1.Enabled:=true;
-//form1.Edit2.Text:='  ';
-form1.Edit3.Text:=' ';
-form1.Edit4.Text:='  ';
-form1.Edit5.Text:='  ';
-form1.Edit6.Text:='  ';
-form1.Edit7.Text:='  ';
-form1.Edit8.Text:='  ';
-form1.Edit9.Text:='  ';
-form1.Memo1.Clear;
-form1.Label1.Caption:=' ';
-case form1.ComboBox1.ItemIndex of
+  //form1.Edit2.Enabled:=true;
+  form1.Edit3.Enabled:=true;
+  form1.Edit4.Enabled:=true;
+  form1.Edit5.Enabled:=true;
+  form1.Edit6.Enabled:=true;
+  form1.Edit7.Enabled:=true;
+  form1.Edit8.Enabled:=true;
+  form1.Edit9.Enabled:=true;
+  form1.Button1.Enabled:=true;
+  form1.Memo1.Enabled:=true;
+  //form1.Edit2.Text:='  ';
+  form1.Edit3.Text:=' ';
+  form1.Edit4.Text:='  ';
+  form1.Edit5.Text:='  ';
+  form1.Edit6.Text:='  ';
+  form1.Edit7.Text:='  ';
+  form1.Edit8.Text:='  ';
+  form1.Edit9.Text:='  ';
+  form1.Memo1.Clear;
+  form1.Label1.Caption:=' ';
+  case form1.ComboBox1.ItemIndex of
     //16
     0:
-      begin
-        masgMax:=2048;
-        form1.Edit2.Text:='16';
-      end;
+    begin
+      masgMax:=2048;
+      form1.Edit2.Text:='16';
+    end;
     //08
     1:
-      begin
-        form1.Edit2.Text:='08';
-        form1.Edit3.Enabled:=false;
-        masgMax:=1024;
-      end;
+    begin
+      form1.Edit2.Text:='08';
+      form1.Edit3.Enabled:=false;
+      masgMax:=1024;
+    end;
     //04
     2:
-      begin
-        form1.Edit2.Text:='04';
-        form1.Edit3.Enabled:=false;
-        masgMax:=512;
-      end;
+    begin
+      form1.Edit2.Text:='04';
+      form1.Edit3.Enabled:=false;
+      masgMax:=512;
+    end;
     //02
     3:
-      begin
-        form1.Edit2.Text:='02';
-        form1.Edit3.Enabled:=false;
-        masgMax:=256;
-      end;
+    begin
+      form1.Edit2.Text:='02';
+      form1.Edit3.Enabled:=false;
+      masgMax:=256;
+    end;
     //01
     4:
-      begin
-        form1.Edit2.Text:='01';
-        form1.Edit3.Enabled:=false;
-        masgMax:=128;
-      end;
-end;
-form1.Label1.Caption:='Проверяемый адреc Орбита '+
-  form1.ComboBox1.Items[form1.ComboBox1.itemindex];
+    begin
+      form1.Edit2.Text:='01';
+      form1.Edit3.Enabled:=false;
+      masgMax:=128;
+    end;
+  end;
+  form1.Label1.Caption:='Проверяемый адреc Орбита '+form1.ComboBox1.Items[form1.ComboBox1.itemindex];
 end;
 
 end.
