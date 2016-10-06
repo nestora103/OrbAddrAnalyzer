@@ -40,53 +40,52 @@ type
   end;
 
 var
-  Form1: TForm1;
-  numOutElemG:integer;
-  stepOutG:integer;
-  masgMax:integer;
+Form1: TForm1;
+numOutElemG:integer;
+stepOutG:integer;
+masgMax:integer;
 implementation
 
 {$R *.dfm}
 
 
-
+//==============================================================================
+//Проверка параметров анализируемой литеры
+//==============================================================================
 function CheckParam(adressString:string;iGraph:integer):boolean;
 var
 rez:boolean;
 begin
-rez:=true;
-if ((ord(adressString[iGraph+1])>=48)and
-  (ord(adressString[iGraph+1])<=57)) then
+  rez:=true;
+  if ((ord(adressString[iGraph+1])>=48)and(ord(adressString[iGraph+1])<=57)) then
   begin
-    if ((strToInt(adressString[iGraph+1])>8)or
-      (strToInt(adressString[iGraph+1])<1))then
-      begin
-        rez:=false;
-      end;
+    if ((strToInt(adressString[iGraph+1])>8)or(strToInt(adressString[iGraph+1])<1))then
+    begin
+      rez:=false;
+    end;
   end
-else
+  else
   begin
     rez:=false;
   end;
-if ((ord(adressString[iGraph+1])>=48)and
-  (ord(adressString[iGraph+1])<=57)) then
+  if ((ord(adressString[iGraph+1])>=48)and(ord(adressString[iGraph+1])<=57)) then
   begin
     if strToInt(adressString[iGraph+2])>2 then
-      begin
-        rez:=false;
-      end;
+    begin
+      rez:=false;
+    end;
   end
-else
+  else
   begin
     rez:=false;
   end;
-result:=rez;
+  result:=rez;
 end;
-
-//==============================================================================
-//
 //==============================================================================
 
+//==============================================================================
+//Анализатор адреса Орбиты
+//==============================================================================
 procedure AdressAnalyser(adressString:string);
 var
 //переданная информативность адреса
@@ -117,26 +116,26 @@ numAdrInBusPocket:string;
 numAdrInBusPocket2:string;
 //contactAdrFlag:boolean;
 begin
-numChOnISD:='';
-numISD:='';
-numBusThread:='';
-adrBus:='';
-numAdrInTable:='';
-numAdrInBusPocket:='';
-numAdrInBusPocket2:='';
-stepOutGins:=1;
-offset:=0;
-pBeginOffset:=0;
-Fa:=0;Fb:=0;Fc:=0;Fd:=0;Fe:=0;Fx:=0;
-//numPoint:=0;
-flagM:=false;
-iGraph:=1;
-//stepKoef:=0;
-flagBegin:=false;
-//установка в 1 для сброса ошибки
-numOutElemG:=1;
+  numChOnISD:='';
+  numISD:='';
+  numBusThread:='';
+  adrBus:='';
+  numAdrInTable:='';
+  numAdrInBusPocket:='';
+  numAdrInBusPocket2:='';
+  stepOutGins:=1;
+  offset:=0;
+  pBeginOffset:=0;
+  Fa:=0;Fb:=0;Fc:=0;Fd:=0;Fe:=0;Fx:=0;
+  //numPoint:=0;
+  flagM:=false;
+  iGraph:=1;
+  //stepKoef:=0;
+  flagBegin:=false;
+  //установка в 1 для сброса ошибки
+  numOutElemG:=1;
 
-while iGraph <= length(adressString) do
+  while iGraph <= length(adressString) do
   begin
     //первый символ должен быть обязательно М
     if adressString[iGraph] = 'M' then
@@ -144,289 +143,290 @@ while iGraph <= length(adressString) do
       //М есть.
       flagM := true;
     end;
-    if ((flagM)and
-    ((adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6')or
-     (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '8')or
-     (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '4')or
-     (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '2')or
-     (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '1')
-    )) then
+
+    if (
+        (flagM)and
+        ((adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6')or
+         (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '8')or
+         (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '4')or
+         (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '2')or
+         (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '1'))
+       ) then
+    begin
+      //M16
+      if (adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6') then
       begin
-        //M16
-        if (adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6') then
+        if ((adressString[iGraph + 3] = 'П') or (adressString[iGraph + 3] = 'п')) then
+        begin
+          if (adressString[iGraph + 4] = '1') then
           begin
-            if ((adressString[iGraph + 3] = 'П') or (adressString[iGraph + 3] = 'п')) then
-              begin
-                if (adressString[iGraph + 4] = '1') then
-                  begin
-                    //задаем нач. смещение для выборки из массива
-                    pBeginOffset := 1;
-                    flagBegin := true;
-                  end;
-                if (adressString[iGraph + 4] = '2') then
-                  begin
-                    //задаем нач. смещение для выборки из массива
-                    pBeginOffset := 2;
-                    flagBegin := true;
-                  end;
-                iGraph := iGraph + 5;
-                break;
-              end
-            else
-              begin
-                //halt;
-                form1.Memo1.Lines.Add('Адрес не соответствует выбранной информативности');
-                break;
-              end;
-          end
-        //остальные
-        else
-          begin
-            if ((adressString[iGraph + 3] = 'П') or (adressString[iGraph + 3] = 'п')) then
-              begin
-                flagBegin := false;
-                break;
-              end;
-            //нач смещение
+            //задаем нач. смещение для выборки из массива
             pBeginOffset := 1;
             flagBegin := true;
-            iGraph := iGraph + 3;
-            break;
           end;
+          if (adressString[iGraph + 4] = '2') then
+          begin
+            //задаем нач. смещение для выборки из массива
+            pBeginOffset := 2;
+            flagBegin := true;
+          end;
+          iGraph := iGraph + 5;
+          break;
+        end
+        else
+        begin
+          //halt;
+          form1.Memo1.Lines.Add('Адрес не соответствует выбранной информативности');
+          break;
+        end;
       end
-    else
+      //остальные
+      else
       begin
+        if ((adressString[iGraph + 3] = 'П') or (adressString[iGraph + 3] = 'п')) then
+        begin
+          flagBegin := false;
+          break;
+        end;
+        //нач смещение
+        pBeginOffset := 1;
+        flagBegin := true;
+        iGraph := iGraph + 3;
         break;
       end;
+    end
+    else
+    begin
+      break;
+    end;
   end;
 
-if (flagBegin) then
+  if (flagBegin) then
   begin
     //обязательную часть проверили
     while (iGraph<=length(adressString)) do
-      begin
-        codAsciiGraph:=ord(adressString[iGraph]);
-        // заполняем коэффициенты чтоб в конце посчитать номер и шаг.
-        case codAsciiGraph of
-          //Поиск А(а)
-          65,97:
-                begin
-                  //проверяем переданные параметры
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Ma:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fa:=8;
-                      end;
-                    1:
-                      begin
-                        Fa:=4;
-                      end;
-                    2:
-                      begin
-                        Fa:=2;
-                      end;
-                  end;
-                  stepOutGins:=Fa;
-                  offset:=offset+Ma;
-                end;
-          //Поиск B(b)
-          66,98:
-                begin
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Mb:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fb:=8;
-                      end;
-                    1:
-                      begin
-                        Fb:=4;
-                      end;
-                    2:
-                      begin
-                        Fb:=2;
-                      end;
-                  end;
-                  offset:=offset+Mb*stepOutGins;
-                  stepOutGins:=stepOutGins*Fb;
-                end;
-          //Поиск C(c)
-          67,99:
-                begin
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Mc:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fc:=8;
-                      end;
-                    1:
-                      begin
-                        Fc:=4;
-                      end;
-                    2:
-                      begin
-                        Fc:=2;
-                      end;
-                  end;
-                  offset:=offset+Mc*stepOutGins;
-                  stepOutGins:=stepOutGins*Fc;
-                end;
-          //Поиск D(d)
-          68,100:
-                begin
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Md:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fd:=8;
-                      end;
-                    1:
-                      begin
-                        Fd:=4;
-                      end;
-                    2:
-                      begin
-                        Fd:=2;
-                      end;
-                  end;
-                  offset:=offset+Md*stepOutGins;
-                  stepOutGins:=stepOutGins*Fd;
-                end;
-          //Поиск E(e)
-          69,101:
-                begin
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Me:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fe:=8;
-                      end;
-                    1:
-                      begin
-                        Fe:=4;
-                      end;
-                    2:
-                      begin
-                        Fe:=2;
-                      end;
-                  end;
-                  offset:=offset+Me*stepOutGins;
-                  stepOutGins:=stepOutGins*Fe;
-                end;
-          //Поиск X(x)
-          88,120:
-                begin
-                  if not CheckParam(adressString,iGraph) then
-                    begin
-                      numOutElemG:=-1;
-                      break;
-                    end;
-                  Mx:=strToInt(adressString[iGraph+1])-1;
-                  stepKoef:=strToInt(adressString[iGraph+2]);
-                  case stepKoef of
-                    0:
-                      begin
-                        Fx:=8;
-                      end;
-                    1:
-                      begin
-                        Fx:=4;
-                      end;
-                    2:
-                      begin
-                        Fx:=2;
-                      end;
-                  end;
-                  offset:=offset+Mx*stepOutGins;
-                  stepOutGins:=stepOutGins*Fx;
-                end;
-        end;
-        iGraph:=iGraph+3;
-      end;
-
-    if numOutElemG<>-1 then
-      begin
-        infStrInt := StrToInt(adressString[2] + adressString[3]);
-        //N1={Ma+Mb*Fa+Mc*Fa*Fb+Md*Fa*Fb*Fc+Me*Fa*Fb*Fc*Fd+Mx*Fa*Fb*Fc*Fd*Fe}
-        //выбираем правильный первый элемент в зависимости от инф разб. адреса
-        //M16
-        if infStrInt = 16 then
+    begin
+      codAsciiGraph:=ord(adressString[iGraph]);
+      // заполняем коэффициенты чтоб в конце посчитать номер и шаг.
+      case codAsciiGraph of
+        //Поиск А(а)
+        65,97:
+        begin
+          //проверяем переданные параметры
+          if not CheckParam(adressString,iGraph) then
           begin
-            numOutElemG := pBeginOffset + 2 * offset;
-          end
-        //остальные
-        else
-          begin
-            numOutElemG := pBeginOffset + offset;
+            numOutElemG:=-1;
+            break;
           end;
-        //выставляем шаг для выборки след. точки в завис. от информативности адреса
-        case infStrInt of
-          16:
+          Ma:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
             begin
-              stepOutG := 2 * stepOutGins; //T=Fa*Fb*Fc*Fd*Fe*Fx
+              Fa:=8;
             end;
-          8:
+            1:
             begin
-              stepOutG := stepOutGins;
+              Fa:=4;
             end;
-          4:
+            2:
             begin
-              stepOutG := round(stepOutGins / 2);
+              Fa:=2;
             end;
-          2:
+          end;
+          stepOutGins:=Fa;
+          offset:=offset+Ma;
+        end;
+        //Поиск B(b)
+        66,98:
+        begin
+          if not CheckParam(adressString,iGraph) then
+          begin
+            numOutElemG:=-1;
+            break;
+          end;
+          Mb:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
             begin
-              stepOutG := round(stepOutGins / 4);
+              Fb:=8;
             end;
-          1:
+            1:
             begin
-              stepOutG := round(stepOutGins / 8);
+              Fb:=4;
             end;
+            2:
+            begin
+              Fb:=2;
+            end;
+          end;
+          offset:=offset+Mb*stepOutGins;
+          stepOutGins:=stepOutGins*Fb;
+        end;
+        //Поиск C(c)
+        67,99:
+        begin
+          if not CheckParam(adressString,iGraph) then
+          begin
+            numOutElemG:=-1;
+            break;
+          end;
+          Mc:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
+            begin
+              Fc:=8;
+            end;
+            1:
+            begin
+              Fc:=4;
+            end;
+            2:
+            begin
+              Fc:=2;
+            end;
+          end;
+          offset:=offset+Mc*stepOutGins;
+          stepOutGins:=stepOutGins*Fc;
+        end;
+        //Поиск D(d)
+        68,100:
+        begin
+          if not CheckParam(adressString,iGraph) then
+          begin
+            numOutElemG:=-1;
+            break;
+          end;
+          Md:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
+            begin
+              Fd:=8;
+            end;
+            1:
+            begin
+              Fd:=4;
+            end;
+            2:
+            begin
+              Fd:=2;
+            end;
+          end;
+          offset:=offset+Md*stepOutGins;
+          stepOutGins:=stepOutGins*Fd;
+        end;
+        //Поиск E(e)
+        69,101:
+        begin
+          if not CheckParam(adressString,iGraph) then
+          begin
+            numOutElemG:=-1;
+            break;
+          end;
+          Me:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
+            begin
+              Fe:=8;
+            end;
+            1:
+            begin
+              Fe:=4;
+            end;
+            2:
+            begin
+              Fe:=2;
+            end;
+          end;
+          offset:=offset+Me*stepOutGins;
+          stepOutGins:=stepOutGins*Fe;
+        end;
+        //Поиск X(x)
+        88,120:
+        begin
+          if not CheckParam(adressString,iGraph) then
+          begin
+            numOutElemG:=-1;
+            break;
+          end;
+          Mx:=strToInt(adressString[iGraph+1])-1;
+          stepKoef:=strToInt(adressString[iGraph+2]);
+          case stepKoef of
+            0:
+            begin
+              Fx:=8;
+            end;
+            1:
+            begin
+              Fx:=4;
+            end;
+            2:
+            begin
+              Fx:=2;
+            end;
+          end;
+          offset:=offset+Mx*stepOutGins;
+          stepOutGins:=stepOutGins*Fx;
         end;
       end;
+      iGraph:=iGraph+3;
+    end;
+
+    //проверяем была ли ошибка при анализе адреса
+    if numOutElemG<>-1 then
+    begin
+      infStrInt := StrToInt(adressString[2] + adressString[3]);
+      //N1={Ma+Mb*Fa+Mc*Fa*Fb+Md*Fa*Fb*Fc+Me*Fa*Fb*Fc*Fd+Mx*Fa*Fb*Fc*Fd*Fe}
+      //выбираем правильный первый элемент в зависимости от инф разб. адреса
+      //M16
+      if infStrInt = 16 then
+      begin
+        numOutElemG := pBeginOffset + 2 * offset;
+      end
+      //остальные
+      else
+      begin
+        numOutElemG := pBeginOffset + offset;
+      end;
+      //выставляем шаг для выборки след. точки в завис. от информативности адреса
+      case infStrInt of
+        16:
+        begin
+          stepOutG := 2 * stepOutGins; //T=Fa*Fb*Fc*Fd*Fe*Fx
+        end;
+        8:
+        begin
+          stepOutG := stepOutGins;
+        end;
+        4:
+        begin
+          stepOutG := round(stepOutGins / 2);
+        end;
+        2:
+        begin
+          stepOutG := round(stepOutGins / 4);
+        end;
+        1:
+        begin
+          stepOutG := round(stepOutGins / 8);
+        end;
+      end;
+    end;
   end
-else
+  else
   begin
     numOutElemG:=-1;
   end;
 end;
 //==============================================================================
 
-
-
-
-
-
+//==============================================================================
+//Процедура сбора адреса политерно в одну строку
+//==============================================================================
 function CollectADR:string;
 var
 str:string;
@@ -479,7 +479,7 @@ if form1.Edit9.Text<>'  ' then
   end;
 result:=str;
 end;
-
+//==============================================================================
 
 procedure TForm1.Button1Click(Sender: TObject);
 const
@@ -491,6 +491,7 @@ str:string;
 iGr:integer;
 begin
 j:=0;
+
 str:=CollectADR;
 AdressAnalyser(str);
 form1.Memo1.Lines.Add(str);
