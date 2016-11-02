@@ -115,6 +115,11 @@ numAdrInTable:string;
 numAdrInBusPocket:string;
 numAdrInBusPocket2:string;
 //contactAdrFlag:boolean;
+
+
+infNum:Integer;
+
+isOkAdr:Boolean;
 begin
   numChOnISD:='';
   numISD:='';
@@ -135,6 +140,8 @@ begin
   //установка в 1 для сброса ошибки
   numOutElemG:=1;
 
+  isOkAdr:=true;
+
   while iGraph <= length(adressString) do
   begin
     //первый символ должен быть обязательно М
@@ -153,6 +160,33 @@ begin
          (adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '1'))
        ) then
     begin
+
+      if  ((adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6')) then
+      begin
+        //M16
+        infNum:=0;
+      end
+      else if ((adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '8')) then
+      begin
+        //M08
+        infNum:=1;
+      end
+      else if ((adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '4')) then
+      begin
+        //M04
+        infNum:=2;
+      end
+      else if ((adressString[iGraph + 1] = '0') and (adressString[iGraph + 2] = '2')) then
+      begin
+        //M02
+        infNum:=3;
+      end
+      else
+      begin
+        //M01
+        infNum:=4;
+      end;
+
       //M16
       if (adressString[iGraph + 1] = '1') and (adressString[iGraph + 2] = '6') then
       begin
@@ -218,20 +252,167 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Ma:=strToInt(adressString[iGraph+1])-1;
-          stepKoef:=strToInt(adressString[iGraph+2]);
-          case stepKoef of
+          Ma:=strToInt(adressString[iGraph+1]);
+
+          case infNum of
             0:
             begin
-              Fa:=8;
+              //M16
+              if ((Ma<1)or(Ma>8)) then
+              begin
+                //ошибка разбора адреса. неверный адрес
+                isOkAdr:=False;
+                Break;
+              end;
             end;
             1:
             begin
-              Fa:=4;
+              //M08
+              if ((Ma<1)or(Ma>8)) then
+              begin
+                //ошибка разбора адреса. неверный адрес
+                isOkAdr:=False;
+                Break;
+              end;
             end;
             2:
             begin
-              Fa:=2;
+              //M04
+              if ((Ma<1)or(Ma>4)) then
+              begin
+                //ошибка разбора адреса. неверный адрес
+                isOkAdr:=False;
+                Break;
+              end;
+            end;
+            3:
+            begin
+              //M02
+              if ((Ma<1)or(Ma>2)) then
+              begin
+                //ошибка разбора адреса. неверный адрес
+                isOkAdr:=False;
+                Break;
+              end;
+            end;
+            4:
+            begin
+              //M01
+              if (Ma<>1) then
+              begin
+                //ошибка разбора адреса. неверный адрес
+                isOkAdr:=False;
+                Break;
+              end;
+            end;
+          end;
+
+          Ma :=Ma-1;
+
+
+          stepKoef:=strToInt(adressString[iGraph+2]);
+
+          case stepKoef of
+            0:
+            begin
+              case infNum of
+                0:
+                begin
+                  //M16
+                  Fa := 8;
+                end;
+                1:
+                begin
+                  //M08
+                  Fa := 8;
+                end;
+                2:
+                begin
+                  //M04
+                  Fa := 4;
+                end;
+                3:
+                begin
+                  //M02
+                  Fa := 2;
+                end;
+                4:
+                begin
+                  //M01
+                  Fa := 1;
+                end;
+              end;
+            end;
+            1:
+            begin
+              case infNum of
+                0:
+                begin
+                  //M16
+                  Fa := 4;
+                end;
+                1:
+                begin
+                  //M08
+                  Fa := 4;
+                end;
+                2:
+                begin
+                  //M04
+                  Fa := 2;
+                end;
+                3:
+                begin
+                  //M02
+                  Fa := 1;
+                end;
+                4:
+                begin
+                  //M01
+                  Fa := 0;
+                  //если Fa < 1 то такого адреса быть не может
+                  isOkAdr:=False;
+                  Break;
+                end;
+              end;
+            end;
+            2:
+            begin
+              case infNum of
+                0:
+                begin
+                  //M16
+                  Fa := 2;
+                end;
+                1:
+                begin
+                  //M08
+                  Fa := 2;
+                end;
+                2:
+                begin
+                  //M04
+                  Fa := 1;
+                end;
+                3:
+                begin
+                  //M02
+                  Fa := 0;
+                  //если Fa < 1 то такого адреса быть не может
+                  //!! ошибка
+                  isOkAdr:=False;
+                  Break;
+                end;
+                4:
+                begin
+                  //M01
+                  Fa := 0;
+                  //если Fa < 1 то такого адреса быть не может
+                  //!! ошибка
+                  isOkAdr:=False;
+                  Break;
+                end;
+              end;
             end;
           end;
           stepOutGins:=Fa;
@@ -245,7 +426,18 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Mb:=strToInt(adressString[iGraph+1])-1;
+          Mb:=strToInt(adressString[iGraph+1]);
+
+          if ((Mb<1)or(Mb>8)) then
+          begin
+            //ошибка разбора адреса. неверный адрес
+            isOkAdr:=False;
+            Break;
+          end;
+          Mb :=Mb-1;
+
+
+
           stepKoef:=strToInt(adressString[iGraph+2]);
           case stepKoef of
             0:
@@ -272,7 +464,16 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Mc:=strToInt(adressString[iGraph+1])-1;
+          Mc:=strToInt(adressString[iGraph+1]);
+
+          if ((Mc<1)or(Mc>8)) then
+          begin
+            //ошибка разбора адреса. неверный адрес
+            isOkAdr:=False;
+            Break;
+          end;
+          Mc :=Mc-1;
+
           stepKoef:=strToInt(adressString[iGraph+2]);
           case stepKoef of
             0:
@@ -299,7 +500,17 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Md:=strToInt(adressString[iGraph+1])-1;
+          Md:=strToInt(adressString[iGraph+1]);
+
+          if ((Md<1)or(Md>8)) then
+          begin
+            //ошибка разбора адреса. неверный адрес
+            isOkAdr:=False;
+            Break;
+          end;
+          Md :=Md-1;
+
+
           stepKoef:=strToInt(adressString[iGraph+2]);
           case stepKoef of
             0:
@@ -326,7 +537,16 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Me:=strToInt(adressString[iGraph+1])-1;
+          Me:=strToInt(adressString[iGraph+1]);
+
+          if ((Me<1)or(Me>8)) then
+          begin
+            //ошибка разбора адреса. неверный адрес
+            isOkAdr:=False;
+            Break;
+          end;
+         
+          Me :=Me-1;
           stepKoef:=strToInt(adressString[iGraph+2]);
           case stepKoef of
             0:
@@ -353,7 +573,14 @@ begin
             numOutElemG:=-1;
             break;
           end;
-          Mx:=strToInt(adressString[iGraph+1])-1;
+          Mx:=strToInt(adressString[iGraph+1]);
+          if ((Mx<1)or(Mx>8)) then
+          begin
+            //ошибка разбора адреса. неверный адрес
+            isOkAdr:=False;
+            Break;
+          end;
+          Mx :=Mx-1;
           stepKoef:=strToInt(adressString[iGraph+2]);
           case stepKoef of
             0:
@@ -376,45 +603,55 @@ begin
       iGraph:=iGraph+3;
     end;
 
-    //проверяем была ли ошибка при анализе адреса
-    if numOutElemG<>-1 then
+    if (isOkAdr) then
     begin
-      infStrInt := StrToInt(adressString[2] + adressString[3]);
-      //N1={Ma+Mb*Fa+Mc*Fa*Fb+Md*Fa*Fb*Fc+Me*Fa*Fb*Fc*Fd+Mx*Fa*Fb*Fc*Fd*Fe}
-      //выбираем правильный первый элемент в зависимости от инф разб. адреса
-      //M16
-      if infStrInt = 16 then
+      //проверяем была ли ошибка при анализе адреса
+      if numOutElemG<>-1 then
       begin
-        numOutElemG := pBeginOffset + 2 * offset;
-      end
-      //остальные
-      else
-      begin
-        numOutElemG := pBeginOffset + offset;
+        infStrInt := StrToInt(adressString[2] + adressString[3]);
+        //N1={Ma+Mb*Fa+Mc*Fa*Fb+Md*Fa*Fb*Fc+Me*Fa*Fb*Fc*Fd+Mx*Fa*Fb*Fc*Fd*Fe}
+        //выбираем правильный первый элемент в зависимости от инф разб. адреса
+        //M16
+        if infStrInt = 16 then
+        begin
+          numOutElemG := pBeginOffset + 2 * offset;
+        end
+        //остальные
+        else
+        begin
+          numOutElemG := pBeginOffset + offset;
+        end;
+        //выставляем шаг для выборки след. точки в завис. от информативности адреса
+        case infStrInt of
+          16:
+          begin
+            stepOutG := 2 * stepOutGins; //T=Fa*Fb*Fc*Fd*Fe*Fx
+          end;
+          8:
+          begin
+            stepOutG := stepOutGins;
+          end;
+          4:
+          begin
+            stepOutG := stepOutGins;
+            //stepOutG := round(stepOutGins / 2);
+          end;
+          2:
+          begin
+            stepOutG := stepOutGins;
+            //stepOutG := round(stepOutGins / 4);
+          end;
+          1:
+          begin
+            stepOutG := stepOutGins;
+            //stepOutG := round(stepOutGins / 8);
+          end;
+        end;
       end;
-      //выставляем шаг для выборки след. точки в завис. от информативности адреса
-      case infStrInt of
-        16:
-        begin
-          stepOutG := 2 * stepOutGins; //T=Fa*Fb*Fc*Fd*Fe*Fx
-        end;
-        8:
-        begin
-          stepOutG := stepOutGins;
-        end;
-        4:
-        begin
-          stepOutG := round(stepOutGins / 2);
-        end;
-        2:
-        begin
-          stepOutG := round(stepOutGins / 4);
-        end;
-        1:
-        begin
-          stepOutG := round(stepOutGins / 8);
-        end;
-      end;
+    end
+    else
+    begin
+      numOutElemG:=-1;
     end;
   end
   else
